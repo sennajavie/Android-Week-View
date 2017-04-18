@@ -891,28 +891,36 @@ public class WeekView extends View {
 
         // Get text dimensions.
         StaticLayout textLayout = new StaticLayout(bob, mEventTextPaint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
-
         int lineHeight = textLayout.getHeight() / textLayout.getLineCount();
 
-        if (availableHeight >= lineHeight) {
-            // Calculate available number of line counts.
-            int availableLineCount = availableHeight / lineHeight;
-            do {
-                // Ellipsize text to fit into event rect.
-                textLayout = new StaticLayout(TextUtils.ellipsize(bob, mEventTextPaint, availableLineCount * availableWidth, TextUtils.TruncateAt.END), mEventTextPaint, (int) (rect.right - originalLeft - mEventPadding * 2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+        // Calculate available number of line counts.
+        int availableLineCount = availableHeight / lineHeight;
 
-                // Reduce line count.
-                availableLineCount--;
 
-                // Repeat until text is short enough.
-            } while (textLayout.getHeight() > availableHeight);
 
-            // Draw text.
-            canvas.save();
-            canvas.translate(originalLeft + mEventPadding, originalTop + mEventPadding);
-            textLayout.draw(canvas);
-            canvas.restore();
+        StringBuilder sbText = new StringBuilder();
+        String[] textLines = event.getName().split(System.getProperty("line.separator"));
+
+        if (availableLineCount == 0) {
+            sbText.append(textLines[0]);
         }
+
+        for (int i = 0; i < availableLineCount; i++) {
+            if (textLines.length > i) {
+                sbText.append(textLines[i]);
+                sbText.append(System.getProperty("line.separator"));
+            }
+        }
+
+        final CharSequence ellipsize = sbText.toString();
+        textLayout = new StaticLayout(ellipsize, mEventTextPaint, (int) (rect.right - originalLeft - mEventPadding * 2), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
+
+        // Draw text.
+        canvas.save();
+        canvas.translate(originalLeft + mEventPadding, originalTop + mEventPadding);
+        textLayout.draw(canvas);
+        canvas.restore();
+        //}
     }
 
 
